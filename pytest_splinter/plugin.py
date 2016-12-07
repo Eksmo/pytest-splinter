@@ -342,13 +342,14 @@ def _take_screenshot(
         fixture_name,
         splinter_screenshot_dir,
         splinter_screenshot_getter_html,
-        splinter_screenshot_getter_png
+        splinter_screenshot_getter_png,
 ):
     """Capture a screenshot as .png and .html.
 
     Invoked from session and function browser fixtures.
     """
     slaveoutput = getattr(request.config, 'slaveoutput', None)
+    session_tmpdir = request.getfuncargvalue('session_tmpdir')
     try:
         names = junitxml.mangle_testnames(request.node.nodeid.split("::"))
     except AttributeError:
