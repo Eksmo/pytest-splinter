@@ -444,7 +444,6 @@ def browser_instance_getter(
         splinter_browser_load_condition,
         splinter_browser_load_timeout,
         splinter_download_file_types,
-        splinter_driver_kwargs,
         splinter_file_download_dir,
         splinter_firefox_profile_preferences,
         splinter_firefox_profile_directory,
@@ -469,7 +468,8 @@ def browser_instance_getter(
 
     :return: function(parent). Each time this function will return new instance of plugin.Browser class.
     """
-    def get_browser(splinter_webdriver, retry_count=3):
+    def get_browser(request, splinter_webdriver, retry_count=3):
+        splinter_driver_kwargs = request.getfuncargvalue('splinter_driver_kwargs')
         kwargs = get_args(driver=splinter_webdriver,
                           download_dir=splinter_file_download_dir,
                           download_ftypes=splinter_download_file_types,
@@ -486,22 +486,22 @@ def browser_instance_getter(
             )
         except Exception:  # NOQA
             if retry_count > 1:
-                return get_browser(splinter_webdriver, retry_count - 1)
+                return get_browser(request, splinter_webdriver, retry_count - 1)
             else:
                 raise
 
-    def prepare_browser(request, parent):
+    def prepare_browser(request, parent, **kwargs):
         splinter_webdriver = request.getfuncargvalue('splinter_webdriver')
         splinter_session_scoped_browser = request.getfuncargvalue('splinter_session_scoped_browser')
         splinter_close_browser = request.getfuncargvalue('splinter_close_browser')
         browser_key = id(parent)
         browser = browser_pool.get(browser_key)
         if not splinter_session_scoped_browser:
-            browser = get_browser(splinter_webdriver)
+            browser = get_browser(request, splinter_webdriver)
             if splinter_close_browser:
                 request.addfinalizer(browser.quit)
         elif not browser:
-            browser = browser_pool[browser_key] = get_browser(splinter_webdriver)
+            browser = browser_pool[browser_key] = get_browser(request, splinter_webdriver)
 
         if request.scope == 'function':
             def _take_screenshot_on_failure():
@@ -540,7 +540,7 @@ def browser_instance_getter(
                 browser.quit()
             except Exception:  # NOQA
                 pass
-            browser = browser_pool[browser_key] = get_browser(splinter_webdriver)
+            browser = browser_pool[browser_key] = get_browser(request, splinter_webdriver)
             prepare_browser(request, parent)
 
         return browser
