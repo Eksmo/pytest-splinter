@@ -458,7 +458,6 @@ def browser_instance_getter(
         splinter_webdriver_executable,
         splinter_window_size,
         splinter_browser_class,
-        splinter_clean_cookies_urls,
         splinter_screenshot_getter_html,
         splinter_screenshot_getter_png,
         splinter_screenshot_encoding,
@@ -495,6 +494,7 @@ def browser_instance_getter(
         splinter_webdriver = request.getfuncargvalue('splinter_webdriver')
         splinter_session_scoped_browser = request.getfuncargvalue('splinter_session_scoped_browser')
         splinter_close_browser = request.getfuncargvalue('splinter_close_browser')
+        splinter_clean_cookies_urls = request.getfuncargvalue('splinter_clean_cookies_urls')
         browser_key = id(parent)
         browser = browser_pool.get(browser_key)
         if not splinter_session_scoped_browser:
